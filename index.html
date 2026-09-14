@@ -91,28 +91,46 @@
   </div>
 
   <script>
-    function buatIde() {
-      const topik = document.getElementById("topik").value;
+    async function buatIde() {
+  const topik = document.getElementById("topik").value.trim();
+  const hasil = document.getElementById("hasil");
 
-      if (topik.trim() === "") {
-        document.getElementById("hasil").innerText =
-          "Masukkan topik terlebih dahulu.";
-        return;
+  if (!topik) {
+    hasil.textContent = "Masukkan topik terlebih dahulu.";
+    return;
+  }
+
+  hasil.textContent = "⏳ Sedang membuat ide dengan AI...";
+
+  try {
+    const response = await fetch(
+      "https://ai-ide-konten-api.fauzisiregar2211.workers.dev",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          topik: topik
+        })
       }
+    );
 
-      document.getElementById("hasil").innerHTML =
-        "<b>Ide konten untuk:</b> " + topik +
-        "<br><br>" +
-        "1. 5 fakta menarik tentang " + topik +
-        "<br>" +
-        "2. Hal yang jarang diketahui tentang " + topik +
-        "<br>" +
-        "3. Kesalahan umum tentang " + topik +
-        "<br>" +
-        "4. 3 hal mengejutkan tentang " + topik +
-        "<br>" +
-        "5. Cerita menarik tentang " + topik;
+    const data = await response.json();
+
+    if (!response.ok) {
+      hasil.textContent = "❌ " + (data.error || "Terjadi kesalahan.");
+      return;
     }
+
+    hasil.style.whiteSpace = "pre-line";
+    hasil.textContent = data.hasil || "AI tidak memberikan hasil.";
+
+  } catch (error) {
+    hasil.textContent = "❌ Tidak dapat terhubung ke server AI.";
+  }
+}
+        
   </script>
 
 </body>
